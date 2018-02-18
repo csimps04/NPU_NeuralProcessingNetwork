@@ -28,7 +28,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity weight_node_reg is
+entity reg_16bit is
     Port (
                 CLK         :   in  std_logic;
                 WE          :   in  std_logic;
@@ -36,9 +36,9 @@ entity weight_node_reg is
                 d_in        :   in  std_logic_vector(15 downto 0);
                 d_out       :   out std_logic_vector(15 downto 0)
      );
-end weight_node_reg;
+end reg_16bit;
 
-architecture Behavioral of weight_node_reg is
+architecture Behavioral of reg_16bit is
 signal layer_output : std_logic_vector(15 downto 0) := x"0000";
 begin
 

@@ -34,8 +34,8 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity output_cache is
     Generic (
-            LY_ADDR_SZE :   integer :=  4;   
-            LAYER_SZE   :   integer :=  10
+            LY_ADDR_SZE :   integer :=  3;   
+            LAYER_SZE   :   integer :=  8
     );
     Port ( 
                 CLK         :   in  std_logic;
@@ -49,7 +49,7 @@ end output_cache;
 
 architecture Behavioral of output_cache is
 
-component weight_node_reg is
+component reg_16bit is
     Port (
                 CLK         :   in  std_logic;
                 WE          :   in  std_logic;
@@ -62,7 +62,7 @@ end component;
 type out_bus is array(0 to LAYER_SZE - 1) of std_logic_vector(15 downto 0);
 signal  S_D_OUT : out_bus := (others => (others => '0'));
 
-signal S_WE_EN : std_logic_vector(LAYER_SZE -1 downto 0) := "0000000000";
+signal S_WE_EN : std_logic_vector(LAYER_SZE -1 downto 0) := "00000000";
 --signal S_D_OUT0 : std_logic_vector(16 downto 0) := x"0000";
 --signal S_D_OUT1 : std_logic_vector(16 downto 0) := x"0000";
 --signal S_D_OUT2 : std_logic_vector(16 downto 0) := x"0000";
@@ -76,7 +76,7 @@ signal S_WE_EN : std_logic_vector(LAYER_SZE -1 downto 0) := "0000000000";
 
 begin
 
-weight0 : weight_node_reg
+out0 : reg_16bit
     Port Map(
                 CLK         =>      CLK,
                 WE          =>      S_WE_EN(0),
@@ -85,7 +85,7 @@ weight0 : weight_node_reg
                 d_out       =>      S_D_OUT(0)      
      );
 
-weight1 : weight_node_reg
+out1 : reg_16bit
     Port Map(
                 CLK         =>      CLK,
                 WE          =>      S_WE_EN(1),
@@ -94,7 +94,7 @@ weight1 : weight_node_reg
                 d_out       =>      S_D_OUT(1)      
      );
 
-weight2 : weight_node_reg
+out2 : reg_16bit
     Port Map(
                 CLK         =>      CLK,
                 WE          =>      S_WE_EN(2),
@@ -103,7 +103,7 @@ weight2 : weight_node_reg
                 d_out       =>      S_D_OUT(2)      
      );     
 
-weight3 : weight_node_reg
+out3 : reg_16bit
     Port Map(
                 CLK         =>      CLK,
                 WE          =>      S_WE_EN(3),
@@ -112,7 +112,7 @@ weight3 : weight_node_reg
                 d_out       =>      S_D_OUT(3)      
      );
 
-weight4 : weight_node_reg
+out4 : reg_16bit
     Port Map(
                 CLK         =>      CLK,
                 WE          =>      S_WE_EN(4),
@@ -121,7 +121,7 @@ weight4 : weight_node_reg
                 d_out       =>      S_D_OUT(4)      
      );
 
-weight5 : weight_node_reg
+out5 : reg_16bit
     Port Map(
                 CLK         =>      CLK,
                 WE          =>      S_WE_EN(5),
@@ -130,7 +130,7 @@ weight5 : weight_node_reg
                 d_out       =>      S_D_OUT(5)      
      );
 
-weight6 : weight_node_reg
+out6 : reg_16bit
     Port Map(
                 CLK         =>      CLK,
                 WE          =>      S_WE_EN(6),
@@ -139,7 +139,7 @@ weight6 : weight_node_reg
                 d_out       =>      S_D_OUT(6)      
      );
 
-weight7 : weight_node_reg
+out7 : reg_16bit
     Port Map(
                 CLK         =>      CLK,
                 WE          =>      S_WE_EN(7),
@@ -149,32 +149,12 @@ weight7 : weight_node_reg
      );
 
 
-weight8 : weight_node_reg
-    Port Map(
-                CLK         =>      CLK,
-                WE          =>      S_WE_EN(8),
-                CLR         =>      CLR,
-                d_in        =>      d_in,
-                d_out       =>      S_D_OUT(8)      
-     );
-
-
-weight9 : weight_node_reg
-    Port Map(
-                CLK         =>      CLK,
-                WE          =>      S_WE_EN(9),
-                CLR         =>      CLR,
-                d_in        =>      d_in,
-                d_out       =>      S_D_OUT(9)      
-     );
-
-
-output_layer : process(WE, CLK, CLR)
+output_layer : process(WE, CLK, S_D_OUT)
 begin
 
-S_WE_EN <= (others => '0');
-S_WE_EN(conv_integer(l_sel)) <= WE;
-d_out <= S_D_OUT(conv_integer(l_sel));
+    S_WE_EN <= (others => '0');
+    S_WE_EN(conv_integer(l_sel)) <= WE;
+    d_out <= S_D_OUT(conv_integer(l_sel));
 
 end process output_layer;
 

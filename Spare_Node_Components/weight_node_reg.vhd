@@ -30,8 +30,8 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity weight_node_reg is
     Generic (
-                ADDR_SZE    :   integer :=  4;   
-                LAYER_SZE   :   integer :=  10
+                ADDR_SZE    :   integer :=  3;   
+                LAYER_SZE   :   integer :=  8
     );
 
     Port (

@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
+-- Company: NPU
+-- Engineer: Cameron Simpson
 -- 
 -- Create Date: 02/08/2018 03:18:01 PM
 -- Design Name: 
@@ -15,7 +15,8 @@
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- 
+--  Upon WE signal, the weights will update on same cycle.
+--  This may cause issues for backprop process
 ----------------------------------------------------------------------------------
 
 
@@ -30,7 +31,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity weight_cache is
     Generic (
             ND_ADDR_SZE :   integer :=  4;
-            LY_ADDR_SZE :   integer :=  4;   
+            LY_ADDR_SZE :   integer :=  3;   
             LAYER_SZE   :   integer :=  10
     );
 
@@ -39,7 +40,7 @@ entity weight_cache is
             WE          :   in  std_logic;
             reset       :   in  std_logic;
             data_in     :   in  std_logic_vector(15 downto 0);
-            layer_sel   :   in  std_logic_vector(ND_ADDR_SZE - 1 downto 0);
+            layer_sel   :   in  std_logic_vector(LY_ADDR_SZE - 1 downto 0);
             nd_sel      :   in  std_logic_vector(ND_ADDR_SZE - 1 downto 0);
             wt_out_0    :   out std_logic_vector(15 downto 0);
             wt_out_1    :   out std_logic_vector(15 downto 0);
@@ -48,9 +49,7 @@ entity weight_cache is
             wt_out_4    :   out std_logic_vector(15 downto 0);
             wt_out_5    :   out std_logic_vector(15 downto 0);
             wt_out_6    :   out std_logic_vector(15 downto 0);
-            wt_out_7    :   out std_logic_vector(15 downto 0);
-            wt_out_8    :   out std_logic_vector(15 downto 0);
-            wt_out_9    :   out std_logic_vector(15 downto 0)
+            wt_out_7    :   out std_logic_vector(15 downto 0)
      );
 end weight_cache;
 
@@ -68,7 +67,7 @@ component weight_node_reg is
 end component;
 
 
-signal      S_LAYER_SSEL     :   std_logic_vector(LY_ADDR_SZE - 1 downto 0) := "0000";
+signal      S_LAYER_SSEL     :   std_logic_vector(LY_ADDR_SZE - 1 downto 0) := "000";
 signal      S_WE_EN          :   std_logic_vector(LAYER_SZE - 1 downto 0) := (others => '0');
 
 
@@ -138,26 +137,10 @@ node7 : weight_node_reg
                 l_sel       =>   layer_sel,
                 d_out       =>   wt_out_7);                
 
-node8 : weight_node_reg
-    Port Map(   CLK         =>   clk,
-                WE          =>   S_WE_EN(8),
-                CLR         =>   reset,
-                d_in        =>   data_in,
-                l_sel       =>   layer_sel,
-                d_out       =>   wt_out_8);   
-
-node9 : weight_node_reg
-    Port Map(   CLK         =>   clk,
-                WE          =>   S_WE_EN(9),
-                CLR         =>   reset,
-                d_in        =>   data_in,
-                l_sel       =>   layer_sel,
-                d_out       =>   wt_out_9);   
-
 
                 
 -- mux 
-node_write_sel  :   process (WE)
+node_write_sel  :   process (WE, nd_sel)
 begin
     S_WE_EN <= "0000000000";
 
