@@ -22,6 +22,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -38,14 +39,14 @@ entity weight_node_reg is
                 CLK         :   in  std_logic;
                 WE          :   in  std_logic;
                 CLR         :   in  std_logic;
-                d_in        :   in  std_logic_vector(15 downto 0);
+                d_in        :   in  signed(15 downto 0);
                 l_sel       :   in  std_logic_vector(ADDR_SZE - 1 downto 0);
-                d_out       :   out std_logic_vector(15 downto 0)
+                d_out       :   out signed(15 downto 0)
      );
 end weight_node_reg;
 
 architecture Behavioral of weight_node_reg is
-    TYPE mem is array(0 to LAYER_SZE - 1) of std_logic_vector(15 downto 0);
+    TYPE mem is array(0 to LAYER_SZE - 1) of signed(15 downto 0);
     signal node_weights : mem := (others => (others => '0'));
 begin
 

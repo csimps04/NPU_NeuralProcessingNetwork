@@ -21,6 +21,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 -- Uncomment the following library declaration if using
@@ -42,8 +43,8 @@ entity output_cache is
                 WE          :   in  std_logic;
                 CLR         :   in  std_logic;
                 l_sel       :   in std_logic_vector(LY_ADDR_SZE - 1 downto 0);
-                d_in        :   in  std_logic_vector(15 downto 0);
-                d_out       :   out std_logic_vector(15 downto 0)
+                d_in        :   in  signed(15 downto 0);
+                d_out       :   out signed(15 downto 0)
     );
 end output_cache;
 
@@ -54,12 +55,12 @@ component reg_16bit is
                 CLK         :   in  std_logic;
                 WE          :   in  std_logic;
                 CLR         :   in  std_logic;
-                d_in        :   in  std_logic_vector(15 downto 0);
-                d_out       :   out std_logic_vector(15 downto 0)
+                d_in        :   in  signed(15 downto 0);
+                d_out       :   out signed(15 downto 0)
      );
 end component;
 
-type out_bus is array(0 to LAYER_SZE - 1) of std_logic_vector(15 downto 0);
+type out_bus is array(0 to LAYER_SZE - 1) of signed(15 downto 0);
 signal  S_D_OUT : out_bus := (others => (others => '0'));
 
 signal S_WE_EN : std_logic_vector(LAYER_SZE -1 downto 0) := "00000000";

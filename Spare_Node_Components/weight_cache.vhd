@@ -23,9 +23,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
-
-
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 
 entity weight_cache is
@@ -39,17 +37,17 @@ entity weight_cache is
             clk         :   in  std_logic;
             WE          :   in  std_logic;
             reset       :   in  std_logic;
-            data_in     :   in  std_logic_vector(15 downto 0);
+            data_in     :   in  signed(15 downto 0);
             layer_sel   :   in  std_logic_vector(LY_ADDR_SZE - 1 downto 0);
             nd_sel      :   in  std_logic_vector(ND_ADDR_SZE - 1 downto 0);
-            wt_out_0    :   out std_logic_vector(15 downto 0);
-            wt_out_1    :   out std_logic_vector(15 downto 0);
-            wt_out_2    :   out std_logic_vector(15 downto 0);
-            wt_out_3    :   out std_logic_vector(15 downto 0);
-            wt_out_4    :   out std_logic_vector(15 downto 0);
-            wt_out_5    :   out std_logic_vector(15 downto 0);
-            wt_out_6    :   out std_logic_vector(15 downto 0);
-            wt_out_7    :   out std_logic_vector(15 downto 0)
+            wt_out_0    :   out signed(15 downto 0);
+            wt_out_1    :   out signed(15 downto 0);
+            wt_out_2    :   out signed(15 downto 0);
+            wt_out_3    :   out signed(15 downto 0);
+            wt_out_4    :   out signed(15 downto 0);
+            wt_out_5    :   out signed(15 downto 0);
+            wt_out_6    :   out signed(15 downto 0);
+            wt_out_7    :   out signed(15 downto 0)
      );
 end weight_cache;
 
@@ -60,9 +58,9 @@ component weight_node_reg is
             CLK         :   in  std_logic;
             WE          :   in  std_logic;
             CLR         :   in  std_logic;
-            d_in        :   in  std_logic_vector(15 downto 0);
+            d_in        :   in  signed(15 downto 0);
             l_sel       :   in  std_logic_vector(LY_ADDR_SZE - 1 downto 0);
-            d_out       :   out std_logic_vector(15 downto 0)
+            d_out       :   out signed(15 downto 0)
      );
 end component;
 

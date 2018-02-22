@@ -21,7 +21,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -33,13 +33,13 @@ entity reg_16bit is
                 CLK         :   in  std_logic;
                 WE          :   in  std_logic;
                 CLR         :   in  std_logic;
-                d_in        :   in  std_logic_vector(15 downto 0);
-                d_out       :   out std_logic_vector(15 downto 0)
+                d_in        :   in  signed(15 downto 0);
+                d_out       :   out signed(15 downto 0)
      );
 end reg_16bit;
 
 architecture Behavioral of reg_16bit is
-signal layer_output : std_logic_vector(15 downto 0) := x"0000";
+signal layer_output : signed(15 downto 0) := x"0000";
 begin
 
     main : process (WE, CLR, CLK)
