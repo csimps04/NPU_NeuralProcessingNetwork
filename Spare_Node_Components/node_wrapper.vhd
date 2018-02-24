@@ -3,6 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity node_wrapper is Port (
+            MODE : IN STD_LOGIC_VECTOR(1 downto 0);
             IN_0 : IN SIGNED(15 downto 0);
             IN_1 : IN SIGNED(15 downto 0);
             IN_2 : IN SIGNED(15 downto 0);
@@ -11,15 +12,24 @@ entity node_wrapper is Port (
             IN_5 : IN SIGNED(15 downto 0);
             IN_6 : IN SIGNED(15 downto 0);
             IN_7 : IN SIGNED(15 downto 0);
-            W_0 : IN SIGNED(15 downto 0);
-            W_1 : IN SIGNED(15 downto 0);
-            W_2 : IN SIGNED(15 downto 0);
-            W_3 : IN SIGNED(15 downto 0);
-            W_4 : IN SIGNED(15 downto 0);
-            W_5 : IN SIGNED(15 downto 0);
-            W_6 : IN SIGNED(15 downto 0);
-            W_7 : IN SIGNED(15 downto 0);
-            OUT_0 : OUT SIGNED(15 downto 0));
+            WIN_0 : IN SIGNED(15 downto 0);
+            WIN_1 : IN SIGNED(15 downto 0);
+            WIN_2 : IN SIGNED(15 downto 0);
+            WIN_3 : IN SIGNED(15 downto 0);
+            WIN_4 : IN SIGNED(15 downto 0);
+            WIN_5 : IN SIGNED(15 downto 0);
+            WIN_6 : IN SIGNED(15 downto 0);
+            WIN_7 : IN SIGNED(15 downto 0);
+            BPIN_0 : IN SIGNED(15 downto 0);
+            BPIN_1 : IN SIGNED(15 downto 0);
+            OUT_0 : OUT SIGNED(15 downto 0);
+            OUT_1 : OUT SIGNED(15 downto 0);
+            OUT_2 : OUT SIGNED(15 downto 0);
+            OUT_3 : OUT SIGNED(15 downto 0);
+            OUT_4 : OUT SIGNED(15 downto 0);
+            OUT_5 : OUT SIGNED(15 downto 0);
+            OUT_6 : OUT SIGNED(15 downto 0);
+            OUT_7 : OUT SIGNED(15 downto 0));
 end node_wrapper;
 
 architecture Behavioral of node_wrapper is
@@ -74,6 +84,50 @@ component sigmoid_block is Port (
             sigmoid: OUT SIGNED(15 downto 0));
 end component;
 
+component bp_deriv_block is Port (
+            D_IN : IN SIGNED(15 downto 0);
+            D_OUT : OUT SIGNED(15 downto 0));
+end component;
+
+component bp_multiply_block is Port (
+            D_IN0 : IN SIGNED(15 downto 0);
+            D_IN1 : IN SIGNED(15 downto 0);
+            D_OUT : OUT SIGNED(15 downto 0));
+end component;
+
+component bp_error_block is Port (
+            SUM: IN SIGNED(31 downto 0);
+            O_VAL : IN SIGNED(15 downto 0);
+            ERR : OUT SIGNED(15 downto 0));
+end component;
+
+component bp_subtract_block is Port (
+            BASE_0 :IN SIGNED(15 downto 0);
+            SUB_0 : IN SIGNED(15 downto 0);
+            BASE_1 :IN SIGNED(15 downto 0);
+            SUB_1 : IN SIGNED(15 downto 0);
+            BASE_2 :IN SIGNED(15 downto 0);
+            SUB_2 : IN SIGNED(15 downto 0);
+            BASE_3 :IN SIGNED(15 downto 0);
+            SUB_3 : IN SIGNED(15 downto 0);
+            BASE_4 :IN SIGNED(15 downto 0);
+            SUB_4 : IN SIGNED(15 downto 0);
+            BASE_5 :IN SIGNED(15 downto 0);
+            SUB_5 : IN SIGNED(15 downto 0);
+            BASE_6 :IN SIGNED(15 downto 0);
+            SUB_6 : IN SIGNED(15 downto 0);
+            BASE_7 :IN SIGNED(15 downto 0);
+            SUB_7 : IN SIGNED(15 downto 0);
+            DIFF_0 : OUT SIGNED(15 downto 0);
+            DIFF_1 : OUT SIGNED(15 downto 0);
+            DIFF_2 : OUT SIGNED(15 downto 0);
+            DIFF_3 : OUT SIGNED(15 downto 0);
+            DIFF_4 : OUT SIGNED(15 downto 0);
+            DIFF_5 : OUT SIGNED(15 downto 0);
+            DIFF_6 : OUT SIGNED(15 downto 0);
+            DIFF_7 : OUT SIGNED(15 downto 0));
+end component;
+
 component mux_16bit_4to1 is Port (
             SEL : IN STD_LOGIC_VECTOR(1 downto 0);
             D_IN0 : IN SIGNED(15 downto 0);
@@ -92,30 +146,59 @@ SIGNAL product5_sig : SIGNED(31 downto 0);
 SIGNAL product6_sig : SIGNED(31 downto 0);
 SIGNAL product7_sig : SIGNED(31 downto 0);
 
+SIGNAL product0_trunc_sig : SIGNED(15 downto 0);
+SIGNAL product1_trunc_sig : SIGNED(15 downto 0);
+SIGNAL product2_trunc_sig : SIGNED(15 downto 0);
+SIGNAL product3_trunc_sig : SIGNED(15 downto 0);
+SIGNAL product4_trunc_sig : SIGNED(15 downto 0);
+SIGNAL product5_trunc_sig : SIGNED(15 downto 0);
+SIGNAL product6_trunc_sig : SIGNED(15 downto 0);
+SIGNAL product7_trunc_sig : SIGNED(15 downto 0);
+
+SIGNAL diff0_sig : SIGNED(15 downto 0);
+SIGNAL diff1_sig : SIGNED(15 downto 0);
+SIGNAL diff2_sig : SIGNED(15 downto 0);
+SIGNAL diff3_sig : SIGNED(15 downto 0);
+SIGNAL diff4_sig : SIGNED(15 downto 0);
+SIGNAL diff5_sig : SIGNED(15 downto 0);
+SIGNAL diff6_sig : SIGNED(15 downto 0);
+SIGNAL diff7_sig : SIGNED(15 downto 0);
+
 SIGNAL sum_sig : SIGNED(35 downto 0);
 SIGNAL shift_sig : SIGNED(35 downto 0);
 SIGNAL sigmoid_sig : SIGNED(15 downto 0);
-SIGNAL output_sig : SIGNED(15 downto 0);
+SIGNAL bp_deriv_sig : SIGNED(15 downto 0);
+SIGNAL bp_mult_sig : SIGNED(15 downto 0);
+SIGNAL bp_error_sig : SIGNED(15 downto 0);
+
+SIGNAL out0_sig : SIGNED(15 downto 0);
+SIGNAL out1_sig : SIGNED(15 downto 0);
+SIGNAL out2_sig : SIGNED(15 downto 0);
+SIGNAL out3_sig : SIGNED(15 downto 0);
+SIGNAL out4_sig : SIGNED(15 downto 0);
+SIGNAL out5_sig : SIGNED(15 downto 0);
+SIGNAL out6_sig : SIGNED(15 downto 0);
+SIGNAL out7_sig : SIGNED(15 downto 0);
 
 begin
 
 mult : multiply_block Port Map (
             m_cand0 => IN_0,
-            m_plier0 => W_0,
+            m_plier0 => WIN_0,
             m_cand1 => IN_1,
-            m_plier1 => W_1,
+            m_plier1 => WIN_1,
             m_cand2 => IN_2,
-            m_plier2 => W_2,
+            m_plier2 => WIN_2,
             m_cand3 => IN_3,
-            m_plier3 => W_3,
+            m_plier3 => WIN_3,
             m_cand4 => IN_4,
-            m_plier4 => W_4,
+            m_plier4 => WIN_4,
             m_cand5 => IN_5,
-            m_plier5 => W_5,
+            m_plier5 => WIN_5,
             m_cand6 => IN_6,
-            m_plier6 => W_6,
+            m_plier6 => WIN_6,
             m_cand7 => IN_7,
-            m_plier7 => W_7,
+            m_plier7 => WIN_7,
             product0 => product0_sig,
             product1 => product1_sig,
             product2 => product2_sig,
@@ -149,15 +232,135 @@ sigmoid : sigmoid_block Port Map (
             sigmoid => sigmoid_sig 
 );
 
-mux : mux_16bit_4to1 Port Map (
-           SEL => "00",
-           D_IN0 => sigmoid_sig,
-           D_IN1 => x"0000",
-           D_IN2 => x"0000",
-           D_IN3 => x"0000",
-           D_OUT => output_sig
+bp_deriv : bp_deriv_block Port Map (
+            D_IN => BPIN_0,
+            D_OUT => bp_deriv_sig
 );
 
-OUT_0 <= output_sig;
+bp_mult : bp_multiply_block Port Map (
+            D_IN0 => bp_deriv_sig,
+            D_IN1 => BPIN_1,
+            D_OUT => bp_mult_sig
+);
+
+bp_error : bp_error_block Port Map (
+            SUM => sum_sig(35 downto 4),
+            O_VAL => BPIN_1,
+            ERR => bp_error_sig
+);
+
+bp_sub : bp_subtract_block Port Map (
+            BASE_0 => WIN_0,
+            SUB_0 => IN_0,
+            BASE_1 => WIN_1,
+            SUB_1 => IN_1,
+            BASE_2 => WIN_2,
+            SUB_2 => IN_2,
+            BASE_3 => WIN_3,
+            SUB_3 => IN_3,
+            BASE_4 => WIN_4,
+            SUB_4 => IN_4,
+            BASE_5 => WIN_5,
+            SUB_5 => IN_5,
+            BASE_6 => WIN_6,
+            SUB_6 => IN_6,
+            BASE_7 => WIN_7,
+            SUB_7 => IN_7,
+            DIFF_0 => diff0_sig,
+            DIFF_1 => diff1_sig,
+            DIFF_2 => diff2_sig,
+            DIFF_3 => diff3_sig,
+            DIFF_4 => diff4_sig,
+            DIFF_5 => diff5_sig,
+            DIFF_6 => diff6_sig,
+            DIFF_7 => diff7_sig
+);
+
+mux0 : mux_16bit_4to1 Port Map (
+           SEL => MODE,
+           D_IN0 => sigmoid_sig,
+           D_IN1 => bp_mult_sig,
+           D_IN2 => product0_trunc_sig,
+           D_IN3 => diff0_sig,
+           D_OUT => out0_sig
+);
+
+mux1 : mux_16bit_4to1 Port Map (
+           SEL => MODE,
+           D_IN0 => bp_error_sig,
+           D_IN1 => x"0000",
+           D_IN2 => product1_trunc_sig,
+           D_IN3 => diff1_sig,
+           D_OUT => out1_sig
+);
+
+mux2 : mux_16bit_4to1 Port Map (
+           SEL => MODE,
+           D_IN0 => x"0000",
+           D_IN1 => x"0000",
+           D_IN2 => product2_trunc_sig,
+           D_IN3 => diff2_sig,
+           D_OUT => out2_sig
+);
+
+mux3 : mux_16bit_4to1 Port Map (
+           SEL => MODE,
+           D_IN0 => x"0000",
+           D_IN1 => x"0000",
+           D_IN2 => product3_trunc_sig,
+           D_IN3 => diff3_sig,
+           D_OUT => out3_sig
+);
+
+mux4 : mux_16bit_4to1 Port Map (
+           SEL => MODE,
+           D_IN0 => x"0000",
+           D_IN1 => x"0000",
+           D_IN2 => product4_trunc_sig,
+           D_IN3 => diff4_sig,
+           D_OUT => out4_sig
+);
+mux5 : mux_16bit_4to1 Port Map (
+           SEL => MODE,
+           D_IN0 => x"0000",
+           D_IN1 => x"0000",
+           D_IN2 => product6_trunc_sig,
+           D_IN3 => diff5_sig,
+           D_OUT => out5_sig
+);
+mux6 : mux_16bit_4to1 Port Map (
+           SEL => MODE,
+           D_IN0 => x"0000",
+           D_IN1 => x"0000",
+           D_IN2 => product6_trunc_sig,
+           D_IN3 => diff6_sig,
+           D_OUT => out6_sig
+);
+mux7 : mux_16bit_4to1 Port Map (
+           SEL => MODE,
+           D_IN0 => x"0000",
+           D_IN1 => x"0000",
+           D_IN2 => product7_trunc_sig,
+           D_IN3 => diff7_sig,
+           D_OUT => out7_sig
+);
+
+product0_trunc_sig <= product0_sig(31) & product0_sig(26 downto 12);
+product1_trunc_sig <= product1_sig(31) & product1_sig(26 downto 12);
+product2_trunc_sig <= product2_sig(31) & product2_sig(26 downto 12);
+product3_trunc_sig <= product3_sig(31) & product3_sig(26 downto 12);
+product4_trunc_sig <= product4_sig(31) & product4_sig(26 downto 12);
+product5_trunc_sig <= product5_sig(31) & product5_sig(26 downto 12);
+product6_trunc_sig <= product6_sig(31) & product6_sig(26 downto 12);
+product7_trunc_sig <= product7_sig(31) & product7_sig(26 downto 12);
+
+OUT_0 <= out0_sig;
+OUT_1 <= out1_sig;
+OUT_2 <= out2_sig;
+OUT_3 <= out3_sig;
+OUT_4 <= out4_sig;
+OUT_5 <= out5_sig;
+OUT_6 <= out6_sig;
+OUT_7 <= out7_sig;
 
 end Behavioral;
