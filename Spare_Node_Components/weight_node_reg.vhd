@@ -46,8 +46,8 @@ entity weight_node_reg is
 end weight_node_reg;
 
 architecture Behavioral of weight_node_reg is
-    TYPE mem is array(0 to LAYER_SZE - 1) of signed(15 downto 0);
-    signal node_weights : mem := (others => (others => '0'));
+    TYPE mem is array(0 to LAYER_SZE - 1) of signed(15 downto 0);       -- Create array for layers of weights
+    signal node_weights : mem := (others => (others => '0'));           -- Initialize node weights to 0 per layer
 begin
 
     main : process (WE, CLR, CLK)
