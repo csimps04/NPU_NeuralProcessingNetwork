@@ -3,7 +3,11 @@ library IEEE;
 use IEEE.Std_logic_1164.all;
 use IEEE.Numeric_Std.all;
 
-entity node_wrapper_tb is
+entity node_wrapper_tb is Generic (
+            CTL_SZE : integer := 4;
+            LY_ADDR_SZE :   integer :=  3;   
+            LAYER_SZE   :   integer :=  8
+);
 end;
 
 architecture bench of node_wrapper_tb is
@@ -92,9 +96,9 @@ architecture bench of node_wrapper_tb is
 begin
 
   -- Insert values for generic parameters !!
-  uut: node_wrapper generic map ( CTL_SZE     => ,
-                                  LY_ADDR_SZE => ,
-                                  LAYER_SZE   =>  )
+  uut: node_wrapper generic map ( CTL_SZE     => CTL_SZE,
+                                  LY_ADDR_SZE => LY_ADDR_SZE,
+                                  LAYER_SZE   =>  LAYER_SZE)
                        port map ( CLK         => CLK,
                                   CTL         => CTL,
                                   LAYER       => LAYER,
@@ -131,15 +135,29 @@ begin
                                   WOUT_6      => WOUT_6,
                                   WOUT_7      => WOUT_7 );
 
+
   stimulus: process
   begin
-  
-    -- Put initialisation code here
-
-
-    -- Put test bench stimulus code here
-
-    wait;
+CLK <= '0';
+CTL <= x"0";
+LAYER <= "000";
+IN_0 <= x"0000";
+IN_1 <= x"0000";
+IN_2 <= x"0000";
+IN_3 <= x"0000";
+IN_4 <= x"0000";
+IN_5 <= x"0000";
+IN_6 <= x"0000";
+IN_7 <= x"0000";
+WIN_0 <= x"0000";
+WIN_1 <= x"0000";
+WIN_2 <= x"0000";
+WIN_3 <= x"0000";
+WIN_4 <= x"0000";
+WIN_5 <= x"0000";
+WIN_6 <= x"0000";
+WIN_7 <= x"0000";
+wait for 10 ns;
   end process;
 
 
