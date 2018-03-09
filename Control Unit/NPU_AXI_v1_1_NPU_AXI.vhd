@@ -17,6 +17,7 @@ entity NPU_AXI_v1_1_NPU_AXI is
 		-- Specific for control unit intermediary signals
         AXI_CNTL_WIDTH      :   integer := 3;
         INPUT_CNTL_WIDTH    :   integer := 32;
+        NPU_CNTL_ADDR_WIDTH :   integer := 3;
         NODE_WIDTH          :   integer := 8;
         NODE_ADDR_WIDTH     :   integer := 3;
         LAYER_WIDTH         :   integer := 8;
@@ -164,7 +165,9 @@ architecture arch_imp of NPU_AXI_v1_1_NPU_AXI is
     signal ctl_reg_wr   :   std_logic := '0';
 	signal ctl_d_wr     :   std_logic := '0';
     signal ctl_bp_wr    :   std_logic := '0';
-    signal ctl_bp_br    :   std_logic := '0';       
+    signal ctl_bp_br    :   std_logic := '0';    
+    signal ctl_reg_rr   :   std_logic := '0'; -- Indicates that weight registers are ready to be read from for output
+    signal ctl_out_rr   :   std_logic := '0'; -- Indicates that output registers are ready to be read from for output
     signal ctl_d_br     :   std_logic := '0';
     signal ctl_dout_br  :   std_logic := '0';
     signal ctl_reg_br   :   std_logic := '0';
@@ -174,7 +177,7 @@ architecture arch_imp of NPU_AXI_v1_1_NPU_AXI is
     signal ctl_wready   :   std_logic := '0';
     
     -- Intermediary control signals for control unit to NPU
-    signal ctl_npu_ctl  :   std_logic_vector(INPUT_CNTL_WIDTH - 1 downto 0) := (others => '0');
+    signal ctl_npu_ctl  :   std_logic_vector(NPU_CNTL_ADDR_WIDTH - 1 downto 0) := (others => '0');
     signal ctl_npu_ndct :   std_logic_vector(NODE_ADDR_WIDTH - 1 downto 0) := (others => '0');
     signal ctl_npu_lyct :   std_logic_vector(LAYER_ADDR_WIDTH - 1 downto 0) := (others => '0');  
     
@@ -187,6 +190,17 @@ architecture arch_imp of NPU_AXI_v1_1_NPU_AXI is
     signal wt_reg5      :   std_logic_vector(15 downto 0) := (others => '0');	
     signal wt_reg6      :   std_logic_vector(15 downto 0) := (others => '0');	
     signal wt_reg7      :   std_logic_vector(15 downto 0) := (others => '0');	
+
+    -- Weight output register signals, come from the node wrapper
+    signal wt_out_reg0      :   std_logic_vector(15 downto 0) := (others => '0');
+    signal wt_out_reg1      :   std_logic_vector(15 downto 0) := (others => '0');
+    signal wt_out_reg2      :   std_logic_vector(15 downto 0) := (others => '0');                               
+    signal wt_out_reg3      :   std_logic_vector(15 downto 0) := (others => '0');	
+    signal wt_out_reg4      :   std_logic_vector(15 downto 0) := (others => '0');	
+    signal wt_out_reg5      :   std_logic_vector(15 downto 0) := (others => '0');	
+    signal wt_out_reg6      :   std_logic_vector(15 downto 0) := (others => '0');	
+    signal wt_out_reg7      :   std_logic_vector(15 downto 0) := (others => '0');	
+
     
     -- output register signals
     signal out_reg0      :   std_logic_vector(15 downto 0) := (others => '0');
@@ -237,10 +251,13 @@ architecture arch_imp of NPU_AXI_v1_1_NPU_AXI is
                 CLK         :   in  std_logic;
                 RESET       :   in  std_logic;  -- Resets all counters and registers
                 CTL_IN      :   in  std_logic_vector(INPUT_CNTL_WIDTH - 1 downto 0); -- Input for the control instruction
+                AXI_R_COMP  :   in  std_logic;  -- Indicates to the control unit that a read has completed, and new values should be placed in register
                 CTRL_WREADY :   in  std_logic;  -- Indicates that a new instruction is ready to be processed
                 REG_WREADY  :   in  std_logic;  -- Indicates that a new value is ready to load into the next weight register
                 D_WREADY    :   in  std_logic;  -- Indicates new value is ready for data
                 BP_WREADY   :   in  std_logic;  -- Indicates new back prop value is ready
+                REG_RREADY  :   out std_logic;  -- Indicates that weight registers are ready to be read from for output
+                OUT_RREADY  :   out std_logic;  -- Indicates that output registers are ready to be read from for output
                 D_BREADY    :   out std_logic;  -- Indicates to AXI when ready for new data
                 REG_BREADY  :   out std_logic;  -- Indicates when AXI should accept new weight register value 
                 BP_BREADY   :   out std_logic;  -- Indicates when AXI should accept new back prop register values
@@ -746,6 +763,9 @@ begin
 	-- bus and axi_rresp indicates the status of read transaction.axi_rvalid 
 	-- is deasserted on reset (active low). axi_rresp and axi_rdata are 
 	-- cleared to zero on reset (active low).  
+	
+	-- ADDITIONAL: ctl_reg_rr and ctl_out_rr conditions for verifying that the correct values have been loaded from the NPU into the AXI 
+	--             registers. Shouldn't delay anything, but just a check.
 	process (S_AXI_ACLK)
 	begin
 	  if rising_edge(S_AXI_ACLK) then
@@ -753,7 +773,7 @@ begin
 	      axi_rvalid <= '0';
 	      axi_rresp  <= "00";
 	    else
-	      if (axi_arready = '1' and S_AXI_ARVALID = '1' and axi_rvalid = '0') then
+	      if (axi_arready = '1' and S_AXI_ARVALID = '1' and axi_rvalid = '0' and (ctl_reg_rr = '1' or ctl_out_rr = '1')) then
 	        -- Valid read data is available at the read data bus
 	        axi_rvalid <= '1';
 	        axi_rresp  <= "00"; -- 'OKAY' response
@@ -777,13 +797,13 @@ begin
 	    loc_addr := axi_araddr(ADDR_LSB + OPT_MEM_ADDR_BITS downto ADDR_LSB);
 	    case loc_addr is
 	      when b"00000" =>
-	        reg_data_out <= axi_wt_reg_1_0;
+	        reg_data_out <= wt_out_reg1 & wt_out_reg0;         -- Set weight output to the output register
 	      when b"00001" =>
-	        reg_data_out <= axi_wt_reg_3_2;
+	        reg_data_out <= wt_out_reg3 & wt_out_reg2;
 	      when b"00010" =>
-	        reg_data_out <= axi_wt_reg_5_4;
+	        reg_data_out <= wt_out_reg5 & wt_out_reg4;
 	      when b"00011" =>
-	        reg_data_out <= axi_wt_reg_7_6;
+	        reg_data_out <= wt_out_reg7 & wt_out_reg6;
 	      when b"00100" =>
 	        reg_data_out <= axi_in_reg_1_0;
 	      when b"00101" =>
@@ -801,13 +821,13 @@ begin
 	      when b"01011" =>
 	        reg_data_out <= axi_bp_reg_7_6;
 	      when b"01100" =>
-	        reg_data_out <= axi_out_reg_1_0;
+	        reg_data_out <= out_reg1 & out_reg0;               -- Set output values for AXI registers
 	      when b"01101" =>
-	        reg_data_out <= axi_out_reg_3_2;
+	        reg_data_out <= out_reg3 & out_reg2;
 	      when b"01110" =>
-	        reg_data_out <= axi_out_reg_5_4;
+	        reg_data_out <= out_reg5 & out_reg4;
 	      when b"01111" =>
-	        reg_data_out <= axi_out_reg_7_6;
+	        reg_data_out <= out_reg7 & out_reg6;
 	      when b"10000" =>
 	        reg_data_out <= axi_learn_rate_reg;
 	      when b"10001" =>
@@ -879,17 +899,19 @@ begin
 	
 	-- WriteReadyResponse indicates that the control unit has recieved the input and processed, and is ready to take in new
 	-- data for certain operations. This resets the write responses set when AXI finishes a data write for all 4 of a set
-	WriteReadyResponse :   process(S_AXI_ACLK, ctl_reg_br, ctl_d_br, ctl_bp_br, ctl_instr_br)
-	begin
-	   if(ctl_reg_br = '1') then
-	       ctl_reg_wr <= '0';
-	   elsif(ctl_d_br = '1') then
-	       
-	   elsif(ctl_bp_br = '1') then 
-	   elsif(ctl_instr_br = '1') then
-	   end if;
+--	WriteReadyResponse :   process(S_AXI_ACLK, ctl_reg_br, ctl_d_br, ctl_bp_br, ctl_instr_br)
+--	begin
+--	   if(ctl_reg_br = '1') then
+--	       ctl_reg_wr <= '0';
+--	   elsif(ctl_d_br = '1') then
+--	       ctl_d_wr   <= '0';
+--	   elsif(ctl_bp_br = '1') then 
+--	       ctl_bp_wr  <= '0'; 
+--	   elsif(ctl_instr_br = '1') then
+--	       ctl_ctl_wr <= '0';
+--	   end if;
 	
-	end process WriteReadyResponse;
+--	end process WriteReadyResponse;
 		--ctl_wready <= (ctl_reg_br OR ctl_d_br OR ctl_bp_br OR ctl_instr_br) AND NOT (ctl_ctl_wr OR ctl_reg_wr OR ctl_d_wr OR ctl_bp_wr);
 	
 
@@ -897,20 +919,29 @@ controller : NPU_Controller
     Port Map(
             CLK         =>  S_AXI_ACLK,
             RESET       =>  S_AXI_ARESETN,
-            CTL_IN      =>  ctrl_cmdReg,--:   in  std_logic_vector(CNTL_ADDR_WIDTH - 1 downto 0);     -- From AXI, for data control
+            AXI_R_COMP  =>  axi_rvalid,
+            CTL_IN      =>  ctrl_cmdReg,    --:   in  std_logic_vector(CNTL_ADDR_WIDTH - 1 downto 0);     -- From AXI, for data control
             CTRL_WREADY =>  ctl_ctl_wr,
-            REG_WREADY  =>  ctl_reg_wr,--:   in  std_logic;  -- Indicates that a new value is ready to load into the next weight register
-            D_WREADY    =>  ctl_d_wr,--:   in  std_logic;  -- Indicates new value is ready for data
-            BP_WREADY   =>  ctl_bp_wr,--:   in  std_logic;  -- Indicates new back prop value is ready
-            D_BREADY    =>  ctl_d_br,--:   out std_logic;  -- Indicates to AXI when ready for new data
-            REG_BREADY  =>  ctl_reg_br,--:   out std_logic;  -- Indicates when AXI should accept new weight register value 
+            REG_WREADY  =>  ctl_reg_wr,     --:   in  std_logic;  -- Indicates that a new value is ready to load into the next weight register
+            D_WREADY    =>  ctl_d_wr,       --:   in  std_logic;  -- Indicates new value is ready for data
+            BP_WREADY   =>  ctl_bp_wr,      --:   in  std_logic;  -- Indicates new back prop value is ready
+            REG_RREADY  =>  ctl_reg_rr,     -- Indicates that weight registers are ready to be read from for output
+            OUT_RREADY  =>  ctl_out_rr,     -- Indicates that output registers are ready to be read from for output
+            D_BREADY    =>  ctl_d_br,       --:   out std_logic;  -- Indicates to AXI when ready for new data
+            REG_BREADY  =>  ctl_reg_br,     --:   out std_logic;  -- Indicates when AXI should accept new weight register value 
             BP_BREADY   =>  ctl_bp_br,
             CTRL_BREADY =>  ctl_instr_br,
-            NODE_CNT    =>  ctl_npu_ndct,--:   out std_logic_vector(NODE_ADDR_WIDTH - 1 downto 0);  -- output to each node
-            LAY_CNT     =>  ctl_npu_lyct,--:   out std_logic_vector(LAYER_ADDR_WIDTH - 1 downto 0); -- output to each node
-            NPU_CTL_OUT =>  ctl_npu_ctl,--:   out std_logic_vector(INPUT_CNTL_WIDTH - 1 downto 0);           
-            AXI_CTL_OUT =>  ctl_axi_out--:   out std_logic_vector(AXI_CNTL_WIDTH - 1 downto 0)    -- May or may not be necessary
+            NODE_CNT    =>  ctl_npu_ndct,   --:   out std_logic_vector(NODE_ADDR_WIDTH - 1 downto 0);  -- output to each node
+            LAY_CNT     =>  ctl_npu_lyct,   --:   out std_logic_vector(LAYER_ADDR_WIDTH - 1 downto 0); -- output to each node
+            NPU_CTL_OUT =>  ctl_npu_ctl,    --:   out std_logic_vector(INPUT_CNTL_WIDTH - 1 downto 0);           
+            AXI_CTL_OUT =>  ctl_axi_out     --:   out std_logic_vector(AXI_CNTL_WIDTH - 1 downto 0)    -- May or may not be necessary
     );
+    
+--        signal ctl_reg_rr   :   std_logic := '0'; -- Indicates that weight registers are ready to be read from for output
+--    signal ctl_out_rr   :   std_logic := '0'; -- Indicates that output registers are ready to be read from for output
+
+    
+    -- Input register mappings from AXI Registers -> NPU
     
     -- weight register mapping
     wt_reg0      <=     axi_wt_reg_1_0(15 downto 0);
@@ -922,36 +953,36 @@ controller : NPU_Controller
     wt_reg6      <=     axi_wt_reg_7_6(15 downto 0);
     wt_reg7      <=     axi_wt_reg_7_6(31 downto 16);
     
-    -- output register signals
-    out_reg0    <=     axi_wt_reg_1_0(15 downto 0);      
-    out_reg1    <=     axi_wt_reg_1_0(31 downto 16);  
-    out_reg2    <=     axi_wt_reg_3_2(15 downto 0);                                     
-    out_reg3    <=     axi_wt_reg_3_2(31 downto 16);      
-    out_reg4    <=     axi_wt_reg_5_4(15 downto 0);      
-    out_reg5    <=     axi_wt_reg_5_4(31 downto 16);      
-    out_reg6    <=     axi_wt_reg_7_6(15 downto 0);      
-    out_reg7    <=     axi_wt_reg_7_6(31 downto 16);   
+--    -- output register signals
+--    out_reg0    <=     axi_out_reg_1_0(15 downto 0);      
+--    out_reg1    <=     axi_out_reg_1_0(31 downto 16);  
+--    out_reg2    <=     axi_out_reg_3_2(15 downto 0);                                     
+--    out_reg3    <=     axi_out_reg_3_2(31 downto 16);      
+--    out_reg4    <=     axi_out_reg_5_4(15 downto 0);      
+--    out_reg5    <=     axi_out_reg_5_4(31 downto 16);      
+--    out_reg6    <=     axi_out_reg_7_6(15 downto 0);      
+--    out_reg7    <=     axi_out_reg_7_6(31 downto 16);   
     
     -- expected value registers for back propagation
-    bp_reg0     <=     axi_wt_reg_1_0(15 downto 0); 
-    bp_reg1     <=     axi_wt_reg_1_0(31 downto 16); 
-    bp_reg2     <=     axi_wt_reg_3_2(15 downto 0);                                     
-    bp_reg3     <=     axi_wt_reg_3_2(31 downto 16);     
-    bp_reg4     <=     axi_wt_reg_5_4(15 downto 0);          
-    bp_reg5     <=     axi_wt_reg_5_4(31 downto 16);     
-    bp_reg6     <=     axi_wt_reg_7_6(15 downto 0);     
-    bp_reg7     <=     axi_wt_reg_7_6(31 downto 16);  
+    bp_reg0     <=     axi_bp_reg_1_0(15 downto 0); 
+    bp_reg1     <=     axi_bp_reg_1_0(31 downto 16); 
+    bp_reg2     <=     axi_bp_reg_3_2(15 downto 0);                                     
+    bp_reg3     <=     axi_bp_reg_3_2(31 downto 16);     
+    bp_reg4     <=     axi_bp_reg_5_4(15 downto 0);          
+    bp_reg5     <=     axi_bp_reg_5_4(31 downto 16);     
+    bp_reg6     <=     axi_bp_reg_7_6(15 downto 0);     
+    bp_reg7     <=     axi_bp_reg_7_6(31 downto 16);  
      
     
     -- input register signals
-    in_reg0     <=     axi_wt_reg_1_0(15 downto 0); 
-    in_reg1     <=     axi_wt_reg_1_0(31 downto 16); 
-    in_reg2     <=     axi_wt_reg_3_2(15 downto 0);                                
-    in_reg3     <=     axi_wt_reg_3_2(31 downto 16);     
-    in_reg4     <=     axi_wt_reg_5_4(15 downto 0);     
-    in_reg5     <=     axi_wt_reg_5_4(31 downto 16);     
-    in_reg6     <=     axi_wt_reg_7_6(15 downto 0);     
-    in_reg7     <=     axi_wt_reg_7_6(31 downto 16); 
+    in_reg0     <=     axi_in_reg_1_0(15 downto 0); 
+    in_reg1     <=     axi_in_reg_1_0(31 downto 16); 
+    in_reg2     <=     axi_in_reg_3_2(15 downto 0);                                
+    in_reg3     <=     axi_in_reg_3_2(31 downto 16);     
+    in_reg4     <=     axi_in_reg_5_4(15 downto 0);     
+    in_reg5     <=     axi_in_reg_5_4(31 downto 16);     
+    in_reg6     <=     axi_in_reg_7_6(15 downto 0);     
+    in_reg7     <=     axi_in_reg_7_6(31 downto 16); 
   
     -- Learning rate signal
     learn_rate      <=    axi_learn_rate_reg(15 downto 0);
