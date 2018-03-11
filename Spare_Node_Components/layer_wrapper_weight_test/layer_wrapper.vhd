@@ -542,11 +542,11 @@ Port Map (
 );
 
 ctl : layer_ctl_dec Generic Map (
-            CTL_SZE : integer := 4;
-            LY_ADDR_SZE :   integer :=  3;   
-            LAYER_SZE   :   integer :=  8;
-            ND_ADDR_SZE : integer := 3;
-            NODE_SZE : integer := 8
+            CTL_SZE => CTL_SZE,
+            LY_ADDR_SZE =>  LY_ADDR_SZE,   
+            LAYER_SZE => LAYER_SZE,
+            ND_ADDR_SZE => ND_ADDR_SZE,
+            NODE_SZE => NODE_SZE
 )
 Port Map(
             CLK => CLK,
@@ -568,26 +568,42 @@ Port Map(
 );
 
 win_sel : process (layer_win_sel, layer_wrapper_win_bus) begin
+
+    n0_win_bus <= (others => x"0000");
+    n1_win_bus <= (others => x"0000");
+    n2_win_bus <= (others => x"0000");
+    n3_win_bus <= (others => x"0000");
+    n4_win_bus <= (others => x"0000");
+    n5_win_bus <= (others => x"0000");
+    n6_win_bus <= (others => x"0000");
+    n7_win_bus <= (others => x"0000");
+
     if layer_win_sel = "000" then
-    n0_win_bus <= layer_wrapper_win_bus;
+        n0_win_bus <= layer_wrapper_win_bus;
     elsif layer_win_sel = "001" then
-    n1_win_bus <= layer_wrapper_win_bus;
+        n1_win_bus <= layer_wrapper_win_bus;
     elsif layer_win_sel = "010" then
-    n2_win_bus <= layer_wrapper_win_bus;
+        n2_win_bus <= layer_wrapper_win_bus;
     elsif layer_win_sel = "011" then
-    n3_win_bus <= layer_wrapper_win_bus;
+        n3_win_bus <= layer_wrapper_win_bus;
     elsif layer_win_sel = "100" then
-    n4_win_bus <= layer_wrapper_win_bus;
+        n4_win_bus <= layer_wrapper_win_bus;
     elsif layer_win_sel = "101" then
-    n5_win_bus <= layer_wrapper_win_bus;
+        n5_win_bus <= layer_wrapper_win_bus;
     elsif layer_win_sel = "110" then
-    n6_win_bus <= layer_wrapper_win_bus;
+        n6_win_bus <= layer_wrapper_win_bus;
     elsif layer_win_sel = "111" then
-    n7_win_bus <= layer_wrapper_win_bus;
-end if;
+        n7_win_bus <= layer_wrapper_win_bus;
+    else
+        --layer_wrapper_win_bus <= layer_wrapper_win_bus;
+    end if;
+    
 end process win_sel;
 
-wout_sel : process (layer_wout_sel) begin
+wout_sel : process (layer_wout_sel, n0_wout_bus,n1_wout_bus,n2_wout_bus,n3_wout_bus,n4_wout_bus,n5_wout_bus,n6_wout_bus,n7_wout_bus) begin
+    
+    layer_wrapper_wout_bus <= (others => x"0000");
+    
     if layer_wout_sel = "000" then
         layer_wrapper_wout_bus <= n0_wout_bus;
     elsif layer_wout_sel = "001" then
@@ -604,6 +620,7 @@ wout_sel : process (layer_wout_sel) begin
         layer_wrapper_wout_bus <= n6_wout_bus;
     elsif layer_wout_sel = "111" then
         layer_wrapper_wout_bus <= n7_wout_bus;
+    else
     end if;
 end process wout_sel;
 

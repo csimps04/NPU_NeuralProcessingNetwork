@@ -35,64 +35,46 @@ begin
 process (CLK, LAYER_CTL, LAYER, NODE) begin
 
   if(rising_edge(CLK)) then
+    LAYER_IN_SEL <= "00";
+    LAYER_WIN_SEL <= "000";
+    LAYER_OUT_SEL <= "00";
+    LAYER_WOUT_SEL <= "000";
+    NODE0_CTL <= x"0";
+    NODE1_CTL <= x"0";
+    NODE2_CTL <= x"0";
+    NODE3_CTL <= x"0";
+    NODE4_CTL <= x"0";
+    NODE5_CTL <= x"0";
+    NODE6_CTL <= x"0";
+    NODE7_CTL <= x"0";
+  
     if(LAYER_CTL = x"0") then --read weight
-        LAYER_IN_SEL <= "00";
-        LAYER_WIN_SEL <= "00";
-        LAYER_OUT_SEL <= "00";
-        LAYER_WOUT_SEL <= "000";
-        NODE0_CTL <= x"0";
-        NODE1_CTL <= x"0";
-        NODE2_CTL <= x"0";
-        NODE3_CTL <= x"0";
-        NODE4_CTL <= x"0";
-        NODE5_CTL <= x"0";
-        NODE6_CTL <= x"0";
-        NODE7_CTL <= x"0";
         LAYER_WIN_SEL <= NODE;
+        LAYER_WOUT_SEL <= NODE;
     elsif(LAYER_CTL = x"1") then -- load wieght
-        LAYER_IN_SEL <= "00";
-        LAYER_WIN_SEL <= "00";
-        LAYER_OUT_SEL <= "00";
-        LAYER_WOUT_SEL <= "000";
-        NODE0_CTL <= x"0";
-        NODE1_CTL <= x"0";
-        NODE2_CTL <= x"0";
-        NODE3_CTL <= x"0";
-        NODE4_CTL <= x"0";
-        NODE5_CTL <= x"0";
-        NODE6_CTL <= x"0";
-        NODE7_CTL <= x"0";
+        LAYER_WIN_SEL <= NODE;
+        LAYER_WOUT_SEL <= NODE;
+
         if NODE = "000" then
-        NODE0_CTL <= x"1";
+            NODE0_CTL <= x"1";
         elsif NODE = "001" then
-        NODE1_CTL <= x"1";
+            NODE1_CTL <= x"1";
         elsif NODE = "010" then
-        NODE2_CTL <= x"1";
+            NODE2_CTL <= x"1";
         elsif NODE = "011" then
-        NODE3_CTL <= x"1";
+            NODE3_CTL <= x"1";
         elsif NODE = "100" then
-        NODE4_CTL <= x"1";
+            NODE4_CTL <= x"1";
         elsif NODE = "101" then
-        NODE5_CTL <= x"1";
+            NODE5_CTL <= x"1";
         elsif NODE = "110" then
-        NODE6_CTL <= x"1";
+            NODE6_CTL <= x"1";
         elsif NODE = "111" then
-        NODE7_CTL <= x"1";
+            NODE7_CTL <= x"1";
         end if;
     else
-        LAYER_IN_SEL <= "00";
-        LAYER_WIN_SEL <= "00";
-        LAYER_OUT_SEL <= "00";
-        LAYER_WOUT_SEL <= "000";
-        NODE0_CTL <= x"0";
-        NODE1_CTL <= x"0";
-        NODE2_CTL <= x"0";
-        NODE3_CTL <= x"0";
-        NODE4_CTL <= x"0";
-        NODE5_CTL <= x"0";
-        NODE6_CTL <= x"0";
-        NODE7_CTL <= x"0";
         LAYER_WIN_SEL <= NODE;
+        LAYER_WOUT_SEL <= NODE;
     end if;
   end if;
 

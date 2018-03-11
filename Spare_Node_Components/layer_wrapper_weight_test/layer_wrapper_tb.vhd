@@ -60,7 +60,7 @@ architecture bench of layer_wrapper_tb is
   );
   end component;
 
-  signal CLK: STD_LOGIC;
+  signal CLK: STD_LOGIC := '0';
   signal LAYER_CTL: STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
   signal LAYER: STD_LOGIC_VECTOR(LY_ADDR_SZE - 1 downto 0);
   signal NODE: STD_LOGIC_VECTOR(ND_ADDR_SZE - 1 downto 0);
@@ -142,9 +142,17 @@ begin
                                    WOUT_6      => WOUT_6,
                                    WOUT_7      => WOUT_7 );
 
+  clock : process
+  begin
+  wait for 10 ns;
+  CLK <= '0';
+  wait for 10 ns;
+  CLK <= '1';
+  end process clock;
+  
   stimulus: process
   begin
-CLK <= '0';
+  wait for 10 ns;
   LAYER_CTL <= x"1";
   LAYER <= "010";
   NODE <= "000";
@@ -164,8 +172,7 @@ CLK <= '0';
   WIN_5 <= x"2000";
   WIN_6 <= x"2000";
   WIN_7 <= x"2000";
-  wait for 20 ns;
-  CLK <= '1';
+  wait for 10 ns;
   LAYER_CTL <= x"1";
   LAYER <= "010";
   NODE <= "000";
@@ -185,8 +192,7 @@ CLK <= '0';
   WIN_5 <= x"2000";
   WIN_6 <= x"2000";
   WIN_7 <= x"2000";
-  wait for 20 ns;
-  CLK <= '0';
+  wait for 10 ns;
   LAYER_CTL <= x"1";
   LAYER <= "100";
   NODE <= "001";
@@ -206,8 +212,7 @@ CLK <= '0';
   WIN_5 <= x"4000";
   WIN_6 <= x"4000";
   WIN_7 <= x"4000";
-  wait for 20 ns;
-  CLK <= '1';
+  wait for 10 ns;
   LAYER_CTL <= x"1";
   LAYER <= "100";
   NODE <= "001";
@@ -227,8 +232,7 @@ CLK <= '0';
   WIN_5 <= x"4000";
   WIN_6 <= x"4000";
   WIN_7 <= x"4000";
-  wait for 20 ns;
-  CLK <= '0';
+  wait for 10 ns;
   LAYER_CTL <= x"0";
   LAYER <= "010";
   NODE <= "000";
@@ -248,8 +252,7 @@ CLK <= '0';
   WIN_5 <= x"0000";
   WIN_6 <= x"0000";
   WIN_7 <= x"0000";
-  wait for 20 ns;
-  CLK <= '1';
+  wait for 10 ns;
   LAYER_CTL <= x"0";
   LAYER <= "010";
   NODE <= "000";
@@ -269,8 +272,7 @@ CLK <= '0';
   WIN_5 <= x"0000";
   WIN_6 <= x"0000";
   WIN_7 <= x"0000";
-  wait for 20 ns;
-  CLK <= '0';
+  wait for 10 ns;
   LAYER_CTL <= x"0";
   LAYER <= "100";
   NODE <= "001";
@@ -290,8 +292,7 @@ CLK <= '0';
   WIN_5 <= x"0000";
   WIN_6 <= x"0000";
   WIN_7 <= x"0000";
-  wait for 20 ns;
-  CLK <= '1';
+  wait for 10 ns;
   LAYER_CTL <= x"0";
   LAYER <= "100";
   NODE <= "001";
@@ -311,8 +312,7 @@ CLK <= '0';
   WIN_5 <= x"0000";
   WIN_6 <= x"0000";
   WIN_7 <= x"0000";
-  wait for 20 ns;
-  CLK <= '0';
+  wait for 10 ns;
   LAYER_CTL <= x"0";
   LAYER <= "100";
   NODE <= "000";
