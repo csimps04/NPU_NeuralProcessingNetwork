@@ -19,6 +19,8 @@ void delay(unsigned int mseconds) {
 #define BRAM_WSTART 0x00000000
 #define BRAM_DATASIZE 0x00000000
 #define BRAM_DATASTART 0x00000000
+#define BRAM_INSSIZE 0x00000000
+#define BRAM_OUTSSIZE 0x00000000
 
 #define OP_START 0x00000000
 #define OP_LOADW 0x00000000
@@ -78,7 +80,7 @@ void poll(int* address, int comp) {
 }
 
 void writeDataBRAM() {
-   int w1, w2, ww, i, data, ds;
+   int w1, w2, ww, i, data, ds, ins, outs;
    poll(UART_IO, OP_START);
    writeBRAM(readUART(), 0x0);
    for(i=0;i<256;i++) {
@@ -89,6 +91,10 @@ void writeDataBRAM() {
    }
    data=readUART();
    writeBRAM(data, BRAM_DATASIZE);
+   ins=readUART();
+   writeBRAM(ins, BRAM_INSSIZE);
+   outs=readUART();
+   writeBRAM(outs, BRAM_OUTSSIZE);
    for(i=0;i<data;i++) {
       ds=readUART();
       writeBRAM(ds, BRAM_DATASTART+i);
