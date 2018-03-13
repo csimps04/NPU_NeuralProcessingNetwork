@@ -144,10 +144,11 @@ begin
 
   clock : process
   begin
-  wait for 10 ns;
+  
   CLK <= '0';
   wait for 10 ns;
   CLK <= '1';
+  wait for 10 ns;
   end process clock;
   
   stimulus: process
@@ -314,7 +315,7 @@ begin
   WIN_7 <= x"0000";
   wait for 10 ns;
   LAYER_CTL <= x"0";
-  LAYER <= "100";
+  LAYER <= "000";
   NODE <= "000";
   IN_0 <= x"0000";
   IN_1 <= x"0000";
@@ -332,7 +333,7 @@ begin
   WIN_5 <= x"0000";
   WIN_6 <= x"0000";
   WIN_7 <= x"0000";
-  wait for 100 ns;
+  wait for 90 ns;
   end process;
 
 

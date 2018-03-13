@@ -578,25 +578,17 @@ win_sel : process (layer_win_sel, layer_wrapper_win_bus) begin
     n6_win_bus <= (others => x"0000");
     n7_win_bus <= (others => x"0000");
 
-    if layer_win_sel = "000" then
-        n0_win_bus <= layer_wrapper_win_bus;
-    elsif layer_win_sel = "001" then
-        n1_win_bus <= layer_wrapper_win_bus;
-    elsif layer_win_sel = "010" then
-        n2_win_bus <= layer_wrapper_win_bus;
-    elsif layer_win_sel = "011" then
-        n3_win_bus <= layer_wrapper_win_bus;
-    elsif layer_win_sel = "100" then
-        n4_win_bus <= layer_wrapper_win_bus;
-    elsif layer_win_sel = "101" then
-        n5_win_bus <= layer_wrapper_win_bus;
-    elsif layer_win_sel = "110" then
-        n6_win_bus <= layer_wrapper_win_bus;
-    elsif layer_win_sel = "111" then
-        n7_win_bus <= layer_wrapper_win_bus;
-    else
-        --layer_wrapper_win_bus <= layer_wrapper_win_bus;
-    end if;
+    case layer_win_sel is
+    when "000" => n0_win_bus <= layer_wrapper_win_bus;
+    when "001" => n1_win_bus <= layer_wrapper_win_bus;
+    when "010" => n2_win_bus <= layer_wrapper_win_bus;
+    when "011" => n3_win_bus <= layer_wrapper_win_bus;
+    when "100" => n4_win_bus <= layer_wrapper_win_bus;
+    when "101" => n5_win_bus <= layer_wrapper_win_bus;
+    when "110" => n6_win_bus <= layer_wrapper_win_bus;
+    when "111" => n7_win_bus <= layer_wrapper_win_bus;
+    when others => n0_win_bus <= (others => (others => '0'));
+    end case;
     
 end process win_sel;
 
@@ -604,24 +596,17 @@ wout_sel : process (layer_wout_sel, n0_wout_bus,n1_wout_bus,n2_wout_bus,n3_wout_
     
     layer_wrapper_wout_bus <= (others => x"0000");
     
-    if layer_wout_sel = "000" then
-        layer_wrapper_wout_bus <= n0_wout_bus;
-    elsif layer_wout_sel = "001" then
-        layer_wrapper_wout_bus <= n1_wout_bus;
-    elsif layer_wout_sel = "010" then
-        layer_wrapper_wout_bus <= n2_wout_bus;
-    elsif layer_wout_sel = "011" then
-        layer_wrapper_wout_bus <= n3_wout_bus;
-    elsif layer_wout_sel = "100" then
-        layer_wrapper_wout_bus <= n4_wout_bus;
-    elsif layer_wout_sel = "101" then
-        layer_wrapper_wout_bus <= n5_wout_bus;
-    elsif layer_wout_sel = "110" then
-        layer_wrapper_wout_bus <= n6_wout_bus;
-    elsif layer_wout_sel = "111" then
-        layer_wrapper_wout_bus <= n7_wout_bus;
-    else
-    end if;
+    case layer_wout_sel is
+        when "000" => layer_wrapper_wout_bus <= n0_wout_bus;
+        when "001" => layer_wrapper_wout_bus <= n1_wout_bus;
+        when "010" => layer_wrapper_wout_bus <= n2_wout_bus;
+        when "011" => layer_wrapper_wout_bus <= n3_wout_bus;
+        when "100" => layer_wrapper_wout_bus <= n4_wout_bus;
+        when "101" => layer_wrapper_wout_bus <= n5_wout_bus;
+        when "110" => layer_wrapper_wout_bus <= n6_wout_bus;
+        when "111" => layer_wrapper_wout_bus <= n7_wout_bus;
+        when others => layer_wrapper_wout_bus <= (others => (others => '0'));
+    end case;
 end process wout_sel;
 
 node_layer_sig <= LAYER;
