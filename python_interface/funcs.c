@@ -94,15 +94,3 @@ void writeDataBRAM() {
       writeBRAM(ds, BRAM_DATASTART+i);
    }
 }
-
-int main() {
-   int n1 = 0x0000AAAA;
-   int n2 = 0x00007777;
-   int n3 = dataConcat(n1, n2);
-   printf("%#x\n", n3);
-   float f1 = 2.25f;
-   int n4 = convertFixed(f1);
-   printf("%#x\n", n4);
-   return 0;
-}
-
