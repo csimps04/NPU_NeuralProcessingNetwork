@@ -47,14 +47,12 @@ process (CLK, LAYER_CTL, LAYER, NODE) begin
     NODE5_CTL <= x"0";
     NODE6_CTL <= x"0";
     NODE7_CTL <= x"0";
-  
     if(LAYER_CTL = x"0") then --read weight
         LAYER_WIN_SEL <= NODE;
         LAYER_WOUT_SEL <= NODE;
     elsif(LAYER_CTL = x"1") then -- load wieght
         LAYER_WIN_SEL <= NODE;
         LAYER_WOUT_SEL <= NODE;
-
         if NODE = "000" then
             NODE0_CTL <= x"1";
         elsif NODE = "001" then
@@ -72,12 +70,46 @@ process (CLK, LAYER_CTL, LAYER, NODE) begin
         elsif NODE = "111" then
             NODE7_CTL <= x"1";
         end if;
+    elsif(LAYER_CTL = x"2") then --forward prop initial input
+        LAYER_OUT_SEL <= "01";
+        LAYER_WIN_SEL <= NODE;
+        LAYER_WOUT_SEL <= NODE;
+        NODE0_CTL <= x"2";
+        NODE1_CTL <= x"2";
+        NODE2_CTL <= x"2";
+        NODE3_CTL <= x"2";
+        NODE4_CTL <= x"2";
+        NODE5_CTL <= x"2";
+        NODE6_CTL <= x"2";
+        NODE7_CTL <= x"2";
+    elsif(LAYER_CTL = x"3") then -- forward prop feedforward input
+        LAYER_IN_SEL <= "01";
+        LAYER_OUT_SEL <= "01";
+        LAYER_WIN_SEL <= NODE;
+        LAYER_WOUT_SEL <= NODE;
+        NODE0_CTL <= x"3";
+        NODE1_CTL <= x"3";
+        NODE2_CTL <= x"3";
+        NODE3_CTL <= x"3";
+        NODE4_CTL <= x"3";
+        NODE5_CTL <= x"3";
+        NODE6_CTL <= x"3";
+        NODE7_CTL <= x"3";
+    elsif(LAYER_CTL = x"E") then
+        LAYER_OUT_SEL <= "01";
+        NODE0_CTL <= x"E";
+        NODE1_CTL <= x"E";
+        NODE2_CTL <= x"E";
+        NODE3_CTL <= x"E";
+        NODE4_CTL <= x"E";
+        NODE5_CTL <= x"E";
+        NODE6_CTL <= x"E";
+        NODE7_CTL <= x"E";
     else
         LAYER_WIN_SEL <= NODE;
         LAYER_WOUT_SEL <= NODE;
     end if;
   end if;
-
 end process;
 
 

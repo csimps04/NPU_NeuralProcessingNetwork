@@ -96,12 +96,55 @@ Port (
 );
 end component;
 
+component layer_ctl is Generic (
+            CTL_SZE : integer := 4;
+            LY_ADDR_SZE :   integer :=  3;   
+            LAYER_SZE   :   integer :=  8;
+            ND_ADDR_SZE : integer := 3;
+            NODE_SZE : integer := 8
+);
+Port (
+            CLK : IN STD_LOGIC;
+            LAYER_CTL : IN STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+            LAYER : IN STD_LOGIC_VECTOR(LY_ADDR_SZE - 1 downto 0);
+            NODE : IN STD_LOGIC_VECTOR(ND_ADDR_SZE - 1 downto 0);
+            NODE0_CTL : OUT STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+            NODE1_CTL : OUT STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+            NODE2_CTL : OUT STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+            NODE3_CTL : OUT STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+            NODE4_CTL : OUT STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+            NODE5_CTL : OUT STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+            NODE6_CTL : OUT STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+            NODE7_CTL : OUT STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+            LAYER_IN_SEL : OUT STD_LOGIC_VECTOR(1 downto 0);
+            LAYER_WIN_SEL : OUT STD_LOGIC_VECTOR(1 downto 0);
+            LAYER_OUT_SEL : OUT STD_LOGIC_VECTOR(1 downto 0);
+            LAYER_WOUT_SEL : OUT STD_LOGIC_VECTOR(1 downto 0)
+            
+);
+end component;
+
 type data_bus is array(0 to 7) of SIGNED(15 downto 0);
 
-SIGNAL node_ctl_sig : STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+
 SIGNAL node_layer_sig : STD_LOGIC_VECTOR(LY_ADDR_SZE - 1 downto 0);
+SIGNAL layer_in_sel : STD_LOGIC_VECTOR(1 downto 0);
+SIGNAL layer_win_sel : STD_LOGIC_VECTOR(1 downto 0);
+SIGNAL layer_out_sel : STD_LOGIC_VECTOR(1 downto 0);
+SIGNAL layer_wout_sel : STD_LOGIC_VECTOR(1 downto 0);
 
 SIGNAL fp_in_bus : data_bus;
+
+SIGNAL bp_in_bus : data_bus;
+
+SIGNAL node0_ctl_sig : STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+SIGNAL node1_ctl_sig : STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+SIGNAL node2_ctl_sig : STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+SIGNAL node3_ctl_sig : STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+SIGNAL node4_ctl_sig : STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+SIGNAL node5_ctl_sig : STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+SIGNAL node6_ctl_sig : STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
+SIGNAL node7_ctl_sig : STD_LOGIC_VECTOR(CTL_SZE - 1 downto 0);
 
 SIGNAL bp_win0_bus : data_bus;
 SIGNAL bp_win1_bus : data_bus;
@@ -162,7 +205,7 @@ n0 : node_wrapper Generic Map (
 )
 Port Map (
             CLK => CLK,
-            CTL => node_ctl_sig,
+            CTL => node0_ctl_sig,
             LAYER => node_layer_sig,
             IN_0 => n0_in_bus(0),
             IN_1 => n0_in_bus(1),
@@ -205,7 +248,7 @@ n1 : node_wrapper Generic Map (
 )
 Port Map (
             CLK => CLK,
-            CTL => node_ctl_sig,
+            CTL => node1_ctl_sig,
             LAYER => node_layer_sig,
             IN_0 => n1_in_bus(0),
             IN_1 => n1_in_bus(1),
@@ -248,7 +291,7 @@ n2 : node_wrapper Generic Map (
 )
 Port Map (
             CLK => CLK,
-            CTL => node_ctl_sig,
+            CTL => node2_ctl_sig,
             LAYER => node_layer_sig,
             IN_0 => n2_in_bus(0),
             IN_1 => n2_in_bus(1),
@@ -291,7 +334,7 @@ n3 : node_wrapper Generic Map (
 )
 Port Map (
             CLK => CLK,
-            CTL => node_ctl_sig,
+            CTL => node3_ctl_sig,
             LAYER => node_layer_sig,
             IN_0 => n3_in_bus(0),
             IN_1 => n3_in_bus(1),
@@ -334,7 +377,7 @@ n4 : node_wrapper Generic Map (
 )
 Port Map (
             CLK => CLK,
-            CTL => node_ctl_sig,
+            CTL => node4_ctl_sig,
             LAYER => node_layer_sig,
             IN_0 => n4_in_bus(0),
             IN_1 => n4_in_bus(1),
@@ -377,7 +420,7 @@ n5 : node_wrapper Generic Map (
 )
 Port Map (
             CLK => CLK,
-            CTL => node_ctl_sig,
+            CTL => node5_ctl_sig,
             LAYER => node_layer_sig,
             IN_0 => n5_in_bus(0),
             IN_1 => n5_in_bus(1),
@@ -420,7 +463,7 @@ n6 : node_wrapper Generic Map (
 )
 Port Map (
             CLK => CLK,
-            CTL => node_ctl_sig,
+            CTL => node6_ctl_sig,
             LAYER => node_layer_sig,
             IN_0 => n6_in_bus(0),
             IN_1 => n6_in_bus(1),
@@ -463,7 +506,7 @@ n7 : node_wrapper Generic Map (
 )
 Port Map (
             CLK => CLK,
-            CTL => node_ctl_sig,
+            CTL => node7_ctl_sig,
             LAYER => node_layer_sig,
             IN_0 => n7_in_bus(0),
             IN_1 => n7_in_bus(1),
@@ -499,7 +542,35 @@ Port Map (
             WOUT_7 => n7_wout_bus(7)
 );
 
+ctl : layer_ctl Generic Map (
+            CTL_SZE : integer := 4;
+            LY_ADDR_SZE :   integer :=  3;   
+            LAYER_SZE   :   integer :=  8;
+            ND_ADDR_SZE : integer := 3;
+            NODE_SZE : integer := 8
+)
+Port Map(
+            CLK => CLK,
+            LAYER_CTL => LAYER_CTL,
+            LAYER => LAYER,
+            NODE => NODE,
+            NODE0_CTL => node0_ctl_sig,
+            NODE1_CTL => node1_ctl_sig,
+            NODE2_CTL => node2_ctl_sig,
+            NODE3_CTL => node3_ctl_sig,
+            NODE4_CTL => node4_ctl_sig,
+            NODE5_CTL => node5_ctl_sig,
+            NODE6_CTL => node6_ctl_sig,
+            NODE7_CTL => node7_ctl_sig,
+            LAYER_IN_SEL => layer_in_sel,
+            LAYER_WIN_SEL => layer_win_sel,
+            LAYER_OUT_SEL => layer_out_sel,
+            LAYER_WOUT_SEL => layer_wout_sel
+);
+
 fp_in_bus <= (0 => n0_out_bus(0), 1 => n1_out_bus(0), 2 => n2_out_bus(0), 3 => n3_out_bus(0), 4 => n4_out_bus(0), 5 => n5_out_bus(0), 6 => n6_out_bus(0), 7 => n7_out_bus(0));
+
+bp_in_bus <= (0 => n0_out_bus(0), 1 => n1_out_bus(0), 2 => n2_out_bus(0), 3 => n3_out_bus(0), 4 => n4_out_bus(0), 5 => n5_out_bus(0), 6 => n6_out_bus(0), 7 => n7_out_bus(0));
 
 bp_win0_bus <= (0 => n0_wout_bus(0), 1 => n1_wout_bus(0), 2 => n2_wout_bus(0), 3 => n3_wout_bus(0), 4 => n4_wout_bus(0), 5 => n5_wout_bus(0), 6 => n6_wout_bus(0), 7 => n7_wout_bus(0));
 bp_win1_bus <= (0 => n0_wout_bus(1), 1 => n1_wout_bus(1), 2 => n2_wout_bus(1), 3 => n3_wout_bus(1), 4 => n4_wout_bus(1), 5 => n5_wout_bus(1), 6 => n6_wout_bus(1), 7 => n7_wout_bus(1));

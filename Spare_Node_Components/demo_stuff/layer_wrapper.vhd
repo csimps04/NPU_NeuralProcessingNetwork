@@ -96,7 +96,8 @@ Port (
 );
 end component;
 
-component layer_ctl_dec is Generic (
+component layer_ctl_dec is 
+Generic (
             CTL_SZE : integer := 4;
             LY_ADDR_SZE :   integer :=  3;   
             LAYER_SZE   :   integer :=  8;
@@ -567,16 +568,47 @@ Port Map(
             LAYER_WOUT_SEL => layer_wout_sel
 );
 
-win_sel : process (layer_win_sel, layer_wrapper_win_bus) begin
+in_sel : process (layer_in_sel, layer_wrapper_in_bus, fp_in_bus) begin
+    case layer_in_sel is
+    when "00" => 
+        n0_in_bus <= layer_wrapper_in_bus;
+        n1_in_bus <= layer_wrapper_in_bus;
+        n2_in_bus <= layer_wrapper_in_bus;
+        n3_in_bus <= layer_wrapper_in_bus;
+        n4_in_bus <= layer_wrapper_in_bus;
+        n5_in_bus <= layer_wrapper_in_bus;
+        n6_in_bus <= layer_wrapper_in_bus;
+        n7_in_bus <= layer_wrapper_in_bus;
+    when "01" => 
+        n0_in_bus <= fp_in_bus;
+        n1_in_bus <= fp_in_bus;
+        n2_in_bus <= fp_in_bus;
+        n3_in_bus <= fp_in_bus;
+        n4_in_bus <= fp_in_bus;
+        n5_in_bus <= fp_in_bus;
+        n6_in_bus <= fp_in_bus;
+        n7_in_bus <= fp_in_bus;
+    when others =>
+        n0_in_bus <= layer_wrapper_in_bus;
+        n1_in_bus <= layer_wrapper_in_bus;
+        n2_in_bus <= layer_wrapper_in_bus;
+        n3_in_bus <= layer_wrapper_in_bus;
+        n4_in_bus <= layer_wrapper_in_bus;
+        n5_in_bus <= layer_wrapper_in_bus;
+        n6_in_bus <= layer_wrapper_in_bus;
+        n7_in_bus <= layer_wrapper_in_bus;
+    end case;
+end process in_sel;
 
-    n0_win_bus <= (others => x"0000");
-    n1_win_bus <= (others => x"0000");
-    n2_win_bus <= (others => x"0000");
-    n3_win_bus <= (others => x"0000");
-    n4_win_bus <= (others => x"0000");
-    n5_win_bus <= (others => x"0000");
-    n6_win_bus <= (others => x"0000");
-    n7_win_bus <= (others => x"0000");
+out_sel : process (layer_out_sel, n0_out_bus, fp_in_bus) begin
+    case layer_out_sel is
+        when "00" => layer_wrapper_out_bus <= n0_out_bus;
+        when "01" => layer_wrapper_out_bus <= fp_in_bus;
+        when others => layer_wrapper_out_bus <= fp_in_bus;
+    end case;
+end process out_sel;
+
+win_sel : process (layer_win_sel, layer_wrapper_win_bus) begin
 
     case layer_win_sel is
     when "000" => n0_win_bus <= layer_wrapper_win_bus;
@@ -593,8 +625,6 @@ win_sel : process (layer_win_sel, layer_wrapper_win_bus) begin
 end process win_sel;
 
 wout_sel : process (layer_wout_sel, n0_wout_bus,n1_wout_bus,n2_wout_bus,n3_wout_bus,n4_wout_bus,n5_wout_bus,n6_wout_bus,n7_wout_bus) begin
-    
-    layer_wrapper_wout_bus <= (others => x"0000");
     
     case layer_wout_sel is
         when "000" => layer_wrapper_wout_bus <= n0_wout_bus;

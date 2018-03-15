@@ -400,6 +400,8 @@ WOUT_5 <= node_wrapper_wout_bus(5);
 WOUT_6 <= node_wrapper_wout_bus(6);
 WOUT_7 <= node_wrapper_wout_bus(7);
 
+out_cache_din_sig <= node_comp_out_bus(0);
+
 err_cache_din_sig <= node_comp_out_bus(1);
 
 node_wrapper_wout_bus <= wght_cache_dout_bus;

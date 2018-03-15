@@ -40,10 +40,10 @@ layer_curr_sig <= unsigned(LAYER);
 layer_prev_sig <= layer_curr_sig - "1";
 layer_next_sig <= layer_curr_sig + "1";
 process (CTL, LAYER) begin
-    if CTL = x"0" then --load weights into weight cache
+    if CTL = x"0" then --read weights from weight cache
         ILSEL <= std_logic_vector(layer_curr_sig);
         OLSEL <= std_logic_vector(layer_curr_sig);
-        WGHT_CACHE_WE <= '1';
+        WGHT_CACHE_WE <= '0';
         WGHT_CACHE_RS <= '0';
         ERR_CACHE_WE <= '0';
         ERR_CACHE_RS <= '0';
@@ -56,10 +56,10 @@ process (CTL, LAYER) begin
         NODE_IN_SEL <= "00";
         NODE_WGHT_SEL <= "00";
         OUT_SEL <= "00";
-    elsif CTL = x"1" then --read weights from weight cache
+    elsif CTL = x"1" then --load weights into weight cache
         ILSEL <= std_logic_vector(layer_curr_sig);
         OLSEL <= std_logic_vector(layer_curr_sig);
-        WGHT_CACHE_WE <= '0';
+        WGHT_CACHE_WE <= '1';
         WGHT_CACHE_RS <= '0';
         WGHT_CACHE_ISEL <= '0';
         ERR_CACHE_WE <= '0';

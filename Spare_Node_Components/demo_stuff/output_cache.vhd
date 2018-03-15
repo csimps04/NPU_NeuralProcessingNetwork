@@ -151,7 +151,7 @@ out7 : reg_16bit
      );
 
 
-output_layer : process(WE, CLK, S_D_OUT)
+output_layer : process(WE, CLK, S_D_OUT, layer_sel_in, layer_sel_out)
 begin
 
     S_WE_EN <= (others => '0');
