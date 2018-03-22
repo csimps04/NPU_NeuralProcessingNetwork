@@ -22,7 +22,20 @@ NPU.parameters(inputs, outputs, hlayers, hlayer_vals)
 # read data from file
 NPU.loadData("filename.txt")
 
+# specify size of training and testing data
+NPU.train_params(tr_batch_size, tst_batch_size)
+
 # write all data to the NPU
 NPU.writeAll()
 
+# begin training
+NPU.train()
+
 # retrieve accuracy statistics from NPU
+error = NPU.error()
+print(error)
+
+# run NPU with a new data point
+ex_input = [0.25, 0.5, 0.75]
+ex_output = NPU.run(example)
+print(ex_output)
