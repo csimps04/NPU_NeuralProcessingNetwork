@@ -2,6 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
+--performs the subtraction operation when modifying weight values during back propagation
+
 entity bp_subtract_block is Port (
             BASE_0 :IN SIGNED(15 downto 0);
             SUB_0 : IN SIGNED(15 downto 0);
@@ -33,6 +35,7 @@ architecture Behavioral of bp_subtract_block is
 
 begin
 
+--subtraction
 DIFF_0 <= BASE_0 - SUB_0;
 DIFF_1 <= BASE_1 - SUB_1;
 DIFF_2 <= BASE_2 - SUB_2;

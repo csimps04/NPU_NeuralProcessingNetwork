@@ -2,6 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
+--control decoder for node wrapper
+
 entity control_decoder is
 Generic (
             CTL_SZE : integer := 4;
@@ -39,6 +41,8 @@ begin
 layer_curr_sig <= unsigned(LAYER);
 layer_prev_sig <= layer_curr_sig - "1";
 layer_next_sig <= layer_curr_sig + "1";
+
+--process changes internal node control signals based on operation mode
 process (CTL, layer_curr_sig, layer_prev_sig, layer_next_sig) begin
     case CTL is
     when x"0" => --read weights from weight cache

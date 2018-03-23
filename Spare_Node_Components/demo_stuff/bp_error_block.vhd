@@ -2,6 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
+--computes error value by multiplying sum by the sigmoid derivative
+
 entity bp_error_block is Port (
             SUM: IN SIGNED(31 downto 0);
             O_VAL : IN SIGNED(15 downto 0);
@@ -14,7 +16,10 @@ SIGNAL product : SIGNED(47 downto 0);
 SIGNAL product_trunc : SIGNED(15 downto 0);
 begin
 
+--multiplication
 product <= SUM * O_VAL;
+
+--truncation
 product_trunc <= product(47 downto 32);
 ERR <= product_trunc;
 

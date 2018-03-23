@@ -198,6 +198,7 @@ SIGNAL layer_wrapper_wout_bus : data_bus;
 
 begin
 
+-- Eight node module instances, one for each node in a layer 
 n0 : node_wrapper Generic Map (
             CTL_SZE => CTL_SZE,
             LY_ADDR_SZE => LY_ADDR_SZE,   
@@ -542,6 +543,7 @@ Port Map (
             WOUT_7 => n7_wout_bus(7)
 );
 
+--layer control decoder that controls layer data flow and generates node control signals for each node
 ctl : layer_ctl_dec Generic Map (
             CTL_SZE => CTL_SZE,
             LY_ADDR_SZE =>  LY_ADDR_SZE,   
@@ -568,6 +570,7 @@ Port Map(
             LAYER_WOUT_SEL => layer_wout_sel
 );
 
+--this process controls the IN bus values for each node
 in_sel : process (layer_in_sel, layer_wrapper_in_bus, fp_in_bus) begin
     case layer_in_sel is
     when "00" => 
@@ -600,6 +603,7 @@ in_sel : process (layer_in_sel, layer_wrapper_in_bus, fp_in_bus) begin
     end case;
 end process in_sel;
 
+--this process controls what is written to the OUT bus of the layer
 out_sel : process (layer_out_sel, n0_out_bus, fp_in_bus) begin
     case layer_out_sel is
         when "00" => layer_wrapper_out_bus <= n0_out_bus;
@@ -608,6 +612,7 @@ out_sel : process (layer_out_sel, n0_out_bus, fp_in_bus) begin
     end case;
 end process out_sel;
 
+--this process selects which node recieves a weight input
 win_sel : process (layer_win_sel, layer_wrapper_win_bus) begin
 
     case layer_win_sel is
@@ -624,6 +629,7 @@ win_sel : process (layer_win_sel, layer_wrapper_win_bus) begin
     
 end process win_sel;
 
+--this process controls which node weights are written to the layer WOUT bus
 wout_sel : process (layer_wout_sel, n0_wout_bus,n1_wout_bus,n2_wout_bus,n3_wout_bus,n4_wout_bus,n5_wout_bus,n6_wout_bus,n7_wout_bus) begin
     
     case layer_wout_sel is

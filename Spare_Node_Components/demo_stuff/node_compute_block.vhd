@@ -2,6 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
+--the node computation block performs mathematical calculations necessary to neural network operation
+
 entity node_compute_block is Port (
             MODE : IN STD_LOGIC_VECTOR(1 downto 0);
             IN_0 : IN SIGNED(15 downto 0);
@@ -184,6 +186,7 @@ SIGNAL out7_sig : SIGNED(15 downto 0);
 
 begin
 
+--handles multiplication of 8 pairs of 16 bit numbers
 mult : multiply_block Port Map (
             m_cand0 => IN_0,
             m_plier0 => WIN_0,
@@ -211,6 +214,7 @@ mult : multiply_block Port Map (
             product7 => product7_sig
 );
 
+--handles summation operation
 sum : sum_block Port Map (
             val0 => product0_sig,
             val1 => product1_sig,
@@ -223,16 +227,19 @@ sum : sum_block Port Map (
             sum => sum_sig
 );
 
+--computes the sigmoid function approximation
 sigmoid : sigmoid_block Port Map (
             input => sum_sig,
             sigmoid => sigmoid_sig 
 );
 
+--computes the derivative of a sigmoid function value for back propogation
 bp_deriv : bp_deriv_block Port Map (
             D_IN => BPIN_0,
             D_OUT => bp_deriv_sig
 );
 
+--selects an input for back propagation
 bp_mult_mux : mux_16bit_2to1 Port Map (
             SEL => MODE(0),
             D_IN0 => bp_lossfunc_sig,
@@ -240,18 +247,21 @@ bp_mult_mux : mux_16bit_2to1 Port Map (
             D_OUT => bp_mult_in_sig
 );
 
+--performs a single multiplication necessary for back propagation calculations
 bp_mult : bp_multiply_block Port Map (
             D_IN0 => bp_deriv_sig,
             D_IN1 => bp_mult_in_sig,
             D_OUT => bp_mult_sig
 );
 
+--computes the error value for the node
 bp_error : bp_error_block Port Map (
             SUM => sum_sig(35 downto 4),
             O_VAL => BPIN_1,
             ERR => bp_error_sig
 );
 
+--subtraction block for back propagation weight updating
 bp_sub : bp_subtract_block Port Map (
             BASE_0 => WIN_0,
             SUB_0 => IN_0,
@@ -279,6 +289,7 @@ bp_sub : bp_subtract_block Port Map (
             DIFF_7 => diff7_sig
 );
 
+--output muxes
 mux0 : mux_16bit_4to1 Port Map (
            SEL => MODE,
            D_IN0 => sigmoid_sig,

@@ -1,6 +1,8 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
+--control decoder for the layer hardware
+
 entity layer_ctl_dec is Generic (
             CTL_SZE : integer := 4;
             LY_ADDR_SZE :   integer :=  3;   
@@ -33,7 +35,7 @@ architecture Behavioral of layer_ctl_dec is
 begin
 
 process (CLK, LAYER_CTL, LAYER, NODE) begin
-
+  --synchronously updates the control values
   if(rising_edge(CLK)) then
     LAYER_IN_SEL <= "00";
     LAYER_WIN_SEL <= "000";
@@ -53,7 +55,7 @@ process (CLK, LAYER_CTL, LAYER, NODE) begin
     elsif(LAYER_CTL = x"1") then -- load wieght
         LAYER_WIN_SEL <= NODE;
         LAYER_WOUT_SEL <= NODE;
-        if NODE = "000" then
+        if NODE = "000" then --selects the correct node to load the weghts
             NODE0_CTL <= x"1";
         elsif NODE = "001" then
             NODE1_CTL <= x"1";

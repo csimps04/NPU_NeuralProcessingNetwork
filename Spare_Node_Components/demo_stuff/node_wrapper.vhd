@@ -2,6 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
+--this module is a wrapper containing all pieces of hardware required to control and perform node operation
+
 entity node_wrapper is
 Generic (
             CTL_SZE : integer := 4;
@@ -194,6 +196,7 @@ SIGNAL node_wrapper_wout_sel : STD_LOGIC_VECTOR(1 downto 0) := "00";
 
 begin
 
+--control signal decoder for the node
 ctl_dec : control_decoder Generic Map (
             CTL_SZE => CTL_SZE,
             LY_ADDR_SZE =>  LY_ADDR_SZE,   
@@ -220,6 +223,7 @@ Port Map(
             
 );
 
+--node computation block, similar to an ALU
 node_comp : node_compute_block Port Map(
             MODE => node_comp_mode_sig,
             IN_0 => node_comp_in_bus(0),
@@ -250,6 +254,7 @@ node_comp : node_compute_block Port Map(
             OUT_7 => node_comp_out_bus(7)
 );
 
+--output cache which contains the output values of previous layers
 out_cache : output_cache Generic Map (
             LY_ADDR_SZE => LY_ADDR_SZE,
             LAYER_SZE => LAYER_SZE
@@ -264,6 +269,7 @@ Port Map (
             d_out =>out_cache_DOUT_sig
 );
 
+--error cache stores the error for the node
 err_cache : output_cache Generic Map (
             LY_ADDR_SZE => LY_ADDR_SZE,
             LAYER_SZE => LAYER_SZE
@@ -278,6 +284,7 @@ Port Map (
             d_out =>err_cache_DOUT_sig
 );
 
+--weight cache stores all of the weights for the node
 wght_cache : weight_cache Generic Map (
             LY_ADDR_SZE => LY_ADDR_SZE,
             LAYER_SZE => LAYER_SZE
@@ -306,6 +313,7 @@ Port Map (
         wt_out_7 => wght_cache_dout_bus(7)
  );
  
+ --gradient cache stores error function gradients for each weight
  grad_cache : weight_cache Generic Map (
              LY_ADDR_SZE => LY_ADDR_SZE,
              LAYER_SZE => LAYER_SZE
@@ -333,7 +341,8 @@ Port Map (
          wt_out_6 => grad_cache_dout_bus(6),
          wt_out_7 => grad_cache_dout_bus(7)
   );
-
+  
+--this process determines what data to put on the OUT bus of the node
 out_sel : process(node_wrapper_out_sel, wght_cache_dout_bus, out_cache_dout_sig, node_comp_out_bus) begin
     case node_wrapper_out_sel is
     when "00" => node_wrapper_out_bus <= wght_cache_dout_bus;
@@ -342,6 +351,7 @@ out_sel : process(node_wrapper_out_sel, wght_cache_dout_bus, out_cache_dout_sig,
     end case;
 end process out_sel;
 
+--this process selects what data is put on the weight cache in bus
 wght_cache_in : process(wght_cache_in_sel, node_wrapper_win_bus, node_comp_out_bus) begin
     case wght_cache_in_sel is
         when '0' => wght_cache_din_bus <= node_wrapper_win_bus;
@@ -349,6 +359,7 @@ wght_cache_in : process(wght_cache_in_sel, node_wrapper_win_bus, node_comp_out_b
     end case;
 end process wght_cache_in;
 
+--this process selects what data is put on the node compute in bus
 node_comp_in : process(node_comp_in_sel, node_wrapper_in_bus, err_cache_dout_sig, grad_cache_dout_bus) begin
         case node_comp_in_sel is
             when "00" => node_comp_in_bus <= node_wrapper_in_bus;
@@ -357,6 +368,7 @@ node_comp_in : process(node_comp_in_sel, node_wrapper_in_bus, err_cache_dout_sig
         end case;
 end process node_comp_in;
 
+--this process selects what data is put on the node compute win bus
 node_comp_wght : process(node_comp_wght_sel, wght_cache_dout_bus, node_wrapper_win_bus) begin
     case node_comp_wght_sel is
         when "00" => node_comp_wght_bus <= wght_cache_dout_bus;

@@ -2,6 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
+--its a 2 to 1 16-bit mux
+
 entity mux_16bit_2to1 is Port (
             SEL : IN STD_LOGIC;
             D_IN0 : IN SIGNED(15 downto 0);

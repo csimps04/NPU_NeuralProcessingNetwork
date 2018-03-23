@@ -2,6 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
+--this piece of hardware computes the sigmoid function approximation for the output
+
 entity sigmoid_block is Port (
                                 input : IN SIGNED(35 downto 0);
                                 sigmoid: OUT SIGNED(15 downto 0));
@@ -31,10 +33,12 @@ begin
 sign <= signed(input(35 downto 0));
 sign_trunc <= signed(input(35) & input(26 downto 12));
 
+--computes shifted values for the different linear regions
 shift0 <= shift_right(sign_trunc, 2);
 shift1 <= shift_right(sign_trunc, 3);
 shift2 <= shift_right(sign_trunc, 5);
 
+--adds offsets to the shifted values to determine the regions' output values
 region0 <= x"0800" + shift0;
 region1 <= x"0A00" + shift1;
 region2 <= x"0D80" + shift2;
@@ -45,6 +49,7 @@ region6 <= x"0600" + shift1;
 
 sigmoid <= out_sig;
 
+--this process uses comparisons to determine which linear region a input is in
 process (input, sign, sign_trunc, shift0, shift1, shift2, region0, region1, region2, region3, region4, region5, region6)
 begin
     if sign > x"FFF000000" and sign < x"001000000" then
