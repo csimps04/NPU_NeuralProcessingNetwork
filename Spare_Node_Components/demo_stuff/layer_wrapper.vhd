@@ -615,6 +615,15 @@ end process out_sel;
 --this process selects which node recieves a weight input
 win_sel : process (layer_win_sel, layer_wrapper_win_bus) begin
 
+    n0_win_bus <= (others => (others => '0'));
+    n1_win_bus <= (others => (others => '0'));
+    n2_win_bus <= (others => (others => '0'));
+    n3_win_bus <= (others => (others => '0'));
+    n4_win_bus <= (others => (others => '0'));
+    n5_win_bus <= (others => (others => '0'));
+    n6_win_bus <= (others => (others => '0'));
+    n7_win_bus <= (others => (others => '0'));
+
     case layer_win_sel is
     when "000" => n0_win_bus <= layer_wrapper_win_bus;
     when "001" => n1_win_bus <= layer_wrapper_win_bus;
